@@ -255,6 +255,7 @@
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				RUN_CLANG_STATIC_ANALYZER = NO;
 				SDKROOT = iphoneos;
+				TITANIUM_SDK = "/Users/InGrowth/Library/Application Support/Titanium/mobilesdk/osx/3.4.0.GA";
 				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Debug;
@@ -296,6 +297,7 @@
 				PRODUCT_NAME = ComLeftlanelabFirebase;
 				RUN_CLANG_STATIC_ANALYZER = NO;
 				SDKROOT = iphoneos;
+				TITANIUM_SDK = "/Users/InGrowth/Library/Application Support/Titanium/mobilesdk/osx/3.4.0.GA";
 				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Release;
