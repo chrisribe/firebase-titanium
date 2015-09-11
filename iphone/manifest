@@ -2,11 +2,9 @@
 # this is your module manifest and used by Titanium
 # during compilation, packaging, distribution, etc.
 #
-
-version: 1.1.1
-# Also update module.xcconfig
-
+version: 1.2.0
 apiversion: 2
+architectures: armv7 arm64 i386 x86_64
 description: Firebase iOS Module
 author: Left Lane Lab
 license: MIT
@@ -15,6 +13,6 @@ copyright: Copyright (c) 2014 by Left Lane Lab, LLC
 # these should not be edited
 name: Firebase iOS Module
 moduleid: com.leftlanelab.firebase
-guid: 45ea9836-0715-4f0c-a308-b6f0997431a9
+guid: f97fea19-e0e1-4bf7-a741-b4f36e3c5a6c
 platform: iphone
-minsdk: 3.5.1.GA
+minsdk: 4.0.0.GA
