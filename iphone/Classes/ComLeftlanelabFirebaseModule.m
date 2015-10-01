@@ -37,6 +37,8 @@
 
 -(void)startup
 {
+	NSLog(@"Firebase module startup");
+	
 	// this method is called when the module is first loaded
 	// you *must* call the superclass
 	[super startup];
@@ -97,13 +99,20 @@
 
 #pragma Public APIs
 
+-(void)testy: (id)args
+{
+	NSLog(@"Testy!!");
+}
+
+
 /**
  * Enable Automatic Local Persistence
  *
  */
 - (void)persistence: (id)args
 {
-	[Firebase setOption:@"persistence" to:@YES];
+//	[Firebase setOption:@"persistence" to:@YES];
+	[Firebase defaultConfig].persistenceEnabled = YES;
 }
 
 /**
@@ -117,27 +126,21 @@
  */
 - (void)auth: (id)args
 {
-    if (! [args count] > 1) {return;}
+//   if (! [args count] > 1) {return;}
 
 	// Initialize the [arguments]
 	NSString *_url = ([args[0] isKindOfClass:[NSString class]] ? args[0] : nil);
 	NSString *_credential = ([args[1] isKindOfClass:[NSString class]] ? args[1] : nil);
 	KrollCallback *_onComplete = ([args count] > 2 && [args[2] isKindOfClass:[KrollCallback class]] ? args[2] : nil);
-	KrollCallback *_onCancel = ([args count] > 3 && [args[3] isKindOfClass:[KrollCallback class]] ? args[3] : nil);
 
 	// Argument Filter
 	if (! _url || ! _credential) {return;}
 
 	// Kick the Firebase
-	[[[Firebase alloc] initWithUrl:_url] authWithCredential:_credential withCompletionBlock:(! _onComplete ? nil : ^(NSError *error, id data)
+	[[[Firebase alloc] initWithUrl:_url] authWithCustomToken:_credential withCompletionBlock:(! _onComplete ? nil : ^(NSError *error, id data)
 	{
 		// Execute [onComplete] callback
 		[_onComplete call:@[(error ? [error localizedDescription] : [NSNull alloc]), (data ? data : [NSNull alloc])] thisObject:nil];
-
-	}) withCancelBlock:(! _onCancel ? nil : ^(NSError *error)
-	{
-		// Execute [onCancel] callback
-		[_onCancel call:@[(error ? [error localizedDescription] : [NSNull alloc])] thisObject:nil];
 
 	})];
 }
@@ -146,26 +149,20 @@
  * De-Authenticate access to this Firebase
  *
  *	- args[0] - (NSString) the URL for Firebase Reference
- *  - args[1] - (KrollCallback) called with the results of the authentication attempt
  *
  */
 - (void)unauth: (id)args
 {
-    if (! [args count]) {return;}
+//    if (! [args count]) {return;}
 
 	// Initialize the [arguments]
 	NSString *_url = ([args[0] isKindOfClass:[NSString class]] ? args[0] : nil);
-	KrollCallback *_onComplete = ([args count] > 1 && [args[1] isKindOfClass:[KrollCallback class]] ? args[1] : nil);
 
 	// Argument Filter
 	if (! _url) {return;}
 
 	// Kick the Firebase
-	[[[Firebase alloc] initWithUrl:_url] unauthWithCompletionBlock:(! _onComplete ? nil : ^(NSError *error)
-	{
-		// Execute [onComplete] callback
-		[_onComplete call:@[(error ? [error localizedDescription] : [NSNull alloc])] thisObject:nil];
-	})];
+	[[[Firebase alloc] initWithUrl:_url] unauth];
 }
 
 /**
@@ -178,7 +175,7 @@
  */
 - (void)set: (id)args
 {
-    if (! [args count] > 1) {return;}
+//    if (! [args count] > (int)@1) {return;}
 
 	// Initialize the [args]
 	NSString *_url = ([args[0] isKindOfClass:[NSString class]] ? args[0] : nil);
@@ -205,7 +202,7 @@
  */
 - (void)update: (id)args
 {
-    if (! [args count] > 1) {return;}
+//    if (! [args count] > (int)@1) {return;}
 
 	// Initialize the [args]
 	NSString *_url = ([args[0] isKindOfClass:[NSString class]] ? args[0] : nil);
@@ -231,7 +228,7 @@
  */
 - (void)remove: (id)args
 {
-    if (! [args count]) {return;}
+//    if (! [args count]) {return;}
 
 	// Initialize the [args]
 	NSString *_url = ([args[0] isKindOfClass:[NSString class]] ? args[0] : nil);
@@ -253,11 +250,11 @@
  *
  *	- args[0] - (NSString) the URL for Firebase Reference
  *
- *	Returns: (NSString) new [child].[name]
+ *	Returns: (NSString) new [child].[key]
  */
 - (NSString*)push: (id)args
 {
-	if (! [args count]) {return;}
+//	if (! [args count]) {return;}
 
 	// Initialize the [args]
 	NSString *_url = ([args[0] isKindOfClass:[NSString class]] ? args[0] : nil);
@@ -266,7 +263,7 @@
 	if (! _url) {return;}
 
 	// Create the new [child] and return [name]
-	return [[[Firebase alloc] initWithUrl:_url] childByAutoId].name;
+	return [[[Firebase alloc] initWithUrl:_url] childByAutoId].key;
 }
 
 /**
@@ -280,7 +277,7 @@
  */
 - (void)setWithPriority: (id)args
 {
-    if (! [args count] > 2) {return;}
+//    if (! [args count] > (int)@2) {return;}
 
 	// Initialize the [args]
 	NSString *_url = ([args[0] isKindOfClass:[NSString class]] ? args[0] : nil);
@@ -307,7 +304,7 @@
  */
 - (void)setPriority: (id)args
 {
-    if (! [args count] > 1) {return;}
+//    if (! [args count] > (int)@1) {return;}
 
 	// Initialize the [args]
 	NSString *_url = ([args[0] isKindOfClass:[NSString class]] ? args[0] : nil);
@@ -335,7 +332,7 @@
  */
 - (void)transaction: (id)args
 {
-    if (! [args count] > 2) {return;}
+//    if (! [args count] > (int)@2) {return;}
 
 	// Initialize the [args]
 	NSString *_url = ([args[0] isKindOfClass:[NSString class]] ? args[0] : nil);
@@ -404,7 +401,7 @@
  */
 -(id)on: (id)args
 {
-    if (! [args count] > 2) {return;}
+//    if (! [args count] > (int)@2) {return;}
 
 	// Initialize the [args]
 	NSString *_url = ([args[0] isKindOfClass:[NSString class]] ? args[0] : nil);
@@ -430,7 +427,7 @@
 	}
 
 	// Set the [handle] while creating a [listener]
-	FirebaseHandle _handle = [self.gInstances[_url] observeEventType:_event andPreviousSiblingNameWithBlock:^(FDataSnapshot *_snapshot, NSString *_prevName)
+	FirebaseHandle _handle = [self.gInstances[_url] observeEventType:_event andPreviousSiblingKeyWithBlock:^(FDataSnapshot *_snapshot, NSString *_prevName)
 	{
 		// Execute [callback]
 		[[NSOperationQueue mainQueue] addOperationWithBlock:^
@@ -468,7 +465,7 @@
  */
 -(void)off: (id)args
 {
-	if (! [args count] > 1) {return;}
+//	if (! [args count] > (int)@1) {return;}
 
 	// Initialize the [arguments]
 	NSString *_url = ([args[0] isKindOfClass:[NSString class]] ? args[0] : nil);
@@ -522,7 +519,7 @@
  */
 -(void)once: (id)args
 {
-    if (! [args count] > 2) {return;}
+//    if (! [args count] > (int)@2) {return;}
 
 	// Initialize the [args]
 	NSString *_url = ([args[0] isKindOfClass:[NSString class]] ? args[0] : nil);
@@ -539,7 +536,7 @@
 	int *_event = _search;
 
 	// Create a [listener]
-	[[[Firebase alloc] initWithUrl:_url] observeSingleEventOfType:_event andPreviousSiblingNameWithBlock:^(FDataSnapshot *_snapshot, NSString *_prevName)
+	[[[Firebase alloc] initWithUrl:_url] observeSingleEventOfType:_event andPreviousSiblingKeyWithBlock:^(FDataSnapshot *_snapshot, NSString *_prevName)
 	{
 		// Execute [callback]
 		[_successCallback call:@[[self FDataSnapshotSpider:_snapshot], (_prevName ? _prevName : [NSNull alloc])] thisObject:nil];
@@ -563,7 +560,7 @@
  */
 -(id)queryOn: (id)args
 {
-    if (! [args count] > 2) {return;}
+//    if (! [args count] > (int)@2) {return;}
 
 	// Initialize the [args]
 	NSNumber *_id = ([args[0] isKindOfClass:[NSNumber class]] ? args[0] : nil);
@@ -583,8 +580,12 @@
 	if (! self.gQuery[_id]) {return;}
 
 	// Set the [handle] while creating a [listener]
-	FirebaseHandle _handle = [self.gQuery[_id] observeEventType:_event andPreviousSiblingNameWithBlock:^(FDataSnapshot *_snapshot, NSString *_prevName)
+	FirebaseHandle _handle = [self.gQuery[_id] observeEventType:_event andPreviousSiblingKeyWithBlock:^(FDataSnapshot *_snapshot, NSString *_prevName)
 	{
+//		for (FDataSnapshot *child in _snapshot.children) {
+//			NSLog(@"Snapshot child in order: %@", child.value);
+//		}
+		
 		// Execute [callback]
 		[_callback call:@[[self FDataSnapshotSpider:_snapshot], (_prevName ? _prevName : [NSNull alloc])] thisObject:nil];
 	}
@@ -599,6 +600,7 @@
 	return [NSNumber numberWithInteger:_handle];
 }
 
+
 /**
  * Remove a listener from a [gQuery] instance
  *
@@ -608,7 +610,7 @@
  */
 -(void)queryOff: (id)args
 {
-    if (! [args count] > 1) {return;}
+//    if (! [args count] > (int)@1) {return;}
 
 	// Initialize the [args]
 	NSNumber *_id = ([args[0] isKindOfClass:[NSNumber class]] ? args[0] : nil);
@@ -635,7 +637,7 @@
  */
 -(void)queryOnce: (id)args
 {
-    if (! [args count] > 2) {return;}
+//    if (! [args count] > (int)@2) {return;}
 
 	// Initialize the [args]
 	NSNumber *_id = ([args[0] isKindOfClass:[NSNumber class]] ? args[0] : nil);
@@ -655,7 +657,7 @@
 	if (! self.gQuery[_id]) {return;}
 
 	// Set the [handle] while creating a [listener]
-	[self.gQuery[_id] observeSingleEventOfType:_event andPreviousSiblingNameWithBlock:^(FDataSnapshot *_snapshot, NSString *_prevName)
+	[self.gQuery[_id] observeSingleEventOfType:_event andPreviousSiblingKeyWithBlock:^(FDataSnapshot *_snapshot, NSString *_prevName)
 	{
 		// Execute [callback]
 		[_successCallback call:@[[self FDataSnapshotSpider:_snapshot], (_prevName ? _prevName : [NSNull alloc])] thisObject:nil];
@@ -676,9 +678,9 @@
  *	- args[2] - (NSNumber) the limit
  *
  */
--(void)limit: (id)args
+-(void)limitToFirst: (id)args
 {
-    if (! [args count] > 2) {return;}
+//    if (! [args count] > (int)@2) {return;}
 
 	// Initialize the [args]
 	NSNumber *_id = ([args[0] isKindOfClass:[NSNumber class]] ? args[0] : nil);
@@ -691,13 +693,169 @@
 	// Initialize [gQuery] for [id] (only done once p/[id])
 	if (! self.gQuery[_id])
 	{
-		[self.gQuery setObject:[[[Firebase alloc] initWithUrl:_url] queryLimitedToNumberOfChildren:[_limit integerValue]] forKey:_id];
+		[self.gQuery setObject:[[[Firebase alloc] initWithUrl:_url] queryLimitedToFirst:[_limit integerValue]] forKey:_id];
 	}
 
 	// Update existing [gQuery] reference
 	else
 	{
-		[self.gQuery setObject:[self.gQuery[_id] queryLimitedToNumberOfChildren:[_limit integerValue]] forKey:_id];
+		[self.gQuery setObject:[self.gQuery[_id] queryLimitedToFirst:[_limit integerValue]] forKey:_id];
+	}
+}
+
+/**
+ * Limit a [gQuery] to a specified number of children.
+ *
+ *	- args[0] - (NSNumber) the [gQuery] instance identifier
+ *	- args[1] - (NSString) the URL for the Firebase Reference
+ *	- args[2] - (NSNumber) the limit
+ *
+ */
+-(void)limitToLast: (id)args
+{
+//	if (! [args count] > (int)@2) {return;}
+	
+	// Initialize the [args]
+	NSNumber *_id = ([args[0] isKindOfClass:[NSNumber class]] ? args[0] : nil);
+	NSString *_url = ([args[1] isKindOfClass:[NSString class]] ? args[1] : nil);
+	NSNumber *_limit = ([args[2] isKindOfClass:[NSNumber class]] ? args[2] : nil);
+	
+	// Argument Filter
+	if (! _id || ! _url || ! _limit) {return;}
+	
+	// Initialize [gQuery] for [id] (only done once p/[id])
+	if (! self.gQuery[_id])
+	{
+		[self.gQuery setObject:[[[Firebase alloc] initWithUrl:_url] queryLimitedToLast:[_limit integerValue]] forKey:_id];
+	}
+	
+	// Update existing [gQuery] reference
+	else
+	{
+		[self.gQuery setObject:[self.gQuery[_id] queryLimitedToLast:[_limit integerValue]] forKey:_id];
+	}
+}
+
+/**
+ * Create a listener for a [gQuery] instance
+ *
+ *	- args[0] - (NSNumber) the [gQuery] instance identifier
+ *	- args[1] - (NSString) the URL for the Firebase Reference
+ *	- args[1] - (NSString) The child key to order by
+ *
+ */
+-(void)orderByChild: (id)args
+{
+	// Initialize the [args]
+	NSNumber *_id = ([args[0] isKindOfClass:[NSNumber class]] ? args[0] : nil);
+	NSString *_url = ([args[1] isKindOfClass:[NSString class]] ? args[1] : nil);
+	NSString *_key = ([args[2] isKindOfClass:[NSString class]] ? args[2] : nil);
+	
+	// Argument Filter
+	if (! _id || ! _url || ! _key) {return;}
+	
+	NSLog(@"Ordering by %@", _key);
+	
+	// Initialize [gQuery] for [id] (only done once p/[id])
+	if (! self.gQuery[_id])
+	{
+//		[[[[Firebase alloc] initWithUrl:_url] queryOrderedByChild:_key]
+//			observeEventType:FEventTypeValue withBlock:^(FDataSnapshot *snap){
+//				for (FDataSnapshot *child in snap.children) {
+//					NSLog(@"Snapshot child in order: %@", child.value);
+//				}
+//			}];
+		[self.gQuery setObject:[[[Firebase alloc] initWithUrl:_url] queryOrderedByChild:_key] forKey:_id];
+	}
+	
+	// Update existing [gQuery] reference
+	else
+	{
+		[self.gQuery setObject:[self.gQuery[_id] queryOrderedByChild:_key] forKey:_id];
+	}
+}
+
+/**
+ * Create a listener for a [gQuery] instance
+ *
+ *	- args[0] - (NSNumber) the [gQuery] instance identifier
+ *	- args[1] - (NSString) the URL for the Firebase Reference
+ */
+-(void)orderByKey: (id)args
+{
+	// Initialize the [args]
+	NSNumber *_id = ([args[0] isKindOfClass:[NSNumber class]] ? args[0] : nil);
+	NSString *_url = ([args[1] isKindOfClass:[NSString class]] ? args[1] : nil);
+	
+	// Argument Filter
+	if (! _id || ! _url) {return;}
+	
+	// Initialize [gQuery] for [id] (only done once p/[id])
+	if (! self.gQuery[_id])
+	{
+		[self.gQuery setObject:[[[Firebase alloc] initWithUrl:_url] queryOrderedByKey] forKey:_id];
+	}
+	
+	// Update existing [gQuery] reference
+	else
+	{
+		[self.gQuery setObject:[self.gQuery[_id] queryOrderedByKey] forKey:_id];
+	}
+}
+
+/**
+ * Create a listener for a [gQuery] instance
+ *
+ *	- args[0] - (NSNumber) the [gQuery] instance identifier
+ *	- args[1] - (NSString) the URL for the Firebase Reference
+ */
+-(void)orderByValue: (id)args
+{
+	// Initialize the [args]
+	NSNumber *_id = ([args[0] isKindOfClass:[NSNumber class]] ? args[0] : nil);
+	NSString *_url = ([args[1] isKindOfClass:[NSString class]] ? args[1] : nil);
+	
+	// Argument Filter
+	if (! _id || ! _url) {return;}
+	
+	// Initialize [gQuery] for [id] (only done once p/[id])
+	if (! self.gQuery[_id])
+	{
+		[self.gQuery setObject:[[[Firebase alloc] initWithUrl:_url] queryOrderedByValue] forKey:_id];
+	}
+	
+	// Update existing [gQuery] reference
+	else
+	{
+		[self.gQuery setObject:[self.gQuery[_id] queryOrderedByValue] forKey:_id];
+	}
+}
+
+/**
+ * Create a listener for a [gQuery] instance
+ *
+ *	- args[0] - (NSNumber) the [gQuery] instance identifier
+ *	- args[1] - (NSString) the URL for the Firebase Reference
+ */
+-(void)orderByPriority: (id)args
+{
+	// Initialize the [args]
+	NSNumber *_id = ([args[0] isKindOfClass:[NSNumber class]] ? args[0] : nil);
+	NSString *_url = ([args[1] isKindOfClass:[NSString class]] ? args[1] : nil);
+	
+	// Argument Filter
+	if (! _id || ! _url) {return;}
+	
+	// Initialize [gQuery] for [id] (only done once p/[id])
+	if (! self.gQuery[_id])
+	{
+		[self.gQuery setObject:[[[Firebase alloc] initWithUrl:_url] queryOrderedByPriority] forKey:_id];
+	}
+	
+	// Update existing [gQuery] reference
+	else
+	{
+		[self.gQuery setObject:[self.gQuery[_id] queryOrderedByPriority] forKey:_id];
 	}
 }
 
@@ -712,7 +870,7 @@
  */
 -(void)startAt: (id)args
 {
-    if (! [args count] > 2) {return;}
+//    if (! [args count] > (int)@2) {return;}
 
 	// Initialize the SIMPLE [args]
 	NSNumber *_id = ([args[0] isKindOfClass:[NSNumber class]] ? args[0] : nil);
@@ -726,7 +884,8 @@
 	// Initialize [gQuery] for [id] (only done once p/[id])
 	if (! self.gQuery[_id])
 	{
-		[self.gQuery setObject:[[[Firebase alloc] initWithUrl:_url] queryStartingAtPriority:_priority andChildName:_childName] forKey:_id];
+		
+		[self.gQuery setObject:[[[[Firebase alloc] initWithUrl:_url] queryOrderedByPriority] queryStartingAtValue:_priority childKey:_childName] forKey:_id];
 	}
 
 	// Update existing [gQuery] reference
@@ -747,7 +906,7 @@
  */
 -(void)endAt: (id)args
 {
-    if (! [args count] > 2) {return;}
+//    if (! [args count] > (int)@2) {return;}
 
 	// Initialize the SIMPLE [args]
 	NSNumber *_id = ([args[0] isKindOfClass:[NSNumber class]] ? args[0] : nil);
@@ -761,7 +920,8 @@
 	// Initialize [gQuery] for [id] (only done once p/[id])
 	if (! self.gQuery[_id])
 	{
-		[self.gQuery setObject:[[[Firebase alloc] initWithUrl:_url] queryEndingAtPriority:_priority andChildName:_childName] forKey:_id];
+		[self.gQuery setObject:[[[[Firebase alloc] initWithUrl:_url] queryOrderedByPriority] queryEndingAtValue:_priority childKey:_childName] forKey:_id];
+//		[self.gQuery setObject:[[[Firebase alloc] initWithUrl:_url] queryEndingAtPriority:_priority andChildName:_childName] forKey:_id];
 	}
 
 	// Update existing [gQuery] reference
@@ -780,7 +940,7 @@
  */
 -(void)onDisconnectCancel: (id)args
 {
-    if (! [args count]) {return;}
+//    if (! [args count]) {return;}
 
 	// Initialize the [args]
 	NSString *_url = ([args[0] isKindOfClass:[NSString class]] ? args[0] : nil);
@@ -806,7 +966,7 @@
  */
 -(void)onDisconnectRemove: (id)args
 {
-    if (! [args count]) {return;}
+//    if (! [args count]) {return;}
 
 	// Initialize the [args]
 	NSString *_url = ([args[0] isKindOfClass:[NSString class]] ? args[0] : nil);
@@ -833,7 +993,7 @@
  */
 -(void)onDisconnectSet: (id)args
 {
-    if (! [args count] > 1) {return;}
+//    if (! [args count] > (int)@1) {return;}
 
 	// Initialize the [args]
 	NSString *_url = ([args[0] isKindOfClass:[NSString class]] ? args[0] : nil);
@@ -861,7 +1021,7 @@
  */
 -(void)onDisconnectSetWithPriority: (id)args
 {
-    if (! [args count] > 2) {return;}
+//    if (! [args count] > (int)@2) {return;}
 
 	// Initialize the [args]
 	NSString *_url = ([args[0] isKindOfClass:[NSString class]] ? args[0] : nil);
@@ -888,7 +1048,7 @@
  */
 -(void)onDisconnectUpdate: (id)args
 {
-    if (! [args count] > 1) {return;}
+//    if (! [args count] > (int)@1) {return;}
 
 	// Initialize the [args]
 	NSString *_url = ([args[0] isKindOfClass:[NSString class]] ? args[0] : nil);
@@ -912,7 +1072,7 @@
 	// Initialize the [payload]
 	NSMutableDictionary *payload = [NSMutableDictionary dictionary];
 
-	[payload setObject:(snapshot.name ? snapshot.name : @"root") forKey:@"name"];
+	[payload setObject:(snapshot.key ? snapshot.key : @"root") forKey:@"key"];
 	[payload setObject:snapshot.priority forKey:@"priority"];
 	[payload setObject:[NSNumber numberWithInteger:snapshot.childrenCount] forKey:@"childrenCount"];
 
@@ -931,7 +1091,10 @@
 
 		for (FDataSnapshot *child in snapshot.children)
 		{
-			[children setObject:[self FDataSnapshotSpider:child] forKey:child.name];
+
+//			NSLog(@"Snapshot child in order: %@", child.value);
+
+			[children setObject:[self FDataSnapshotSpider:child] forKey:child.key];
 		}
 
 		[payload setObject:children forKey:@"value"];
@@ -939,7 +1102,9 @@
 
 	// No [children]
 	else
-	{[payload setObject:snapshot.value forKey:@"value"];}
+	{
+		[payload setObject:snapshot.value forKey:@"value"];
+	}
 
 	return payload;
 }
@@ -949,7 +1114,7 @@
 	// Initialize the [payload]
 	NSMutableDictionary *payload = [NSMutableDictionary dictionary];
 
-	[payload setObject:(data.name ? data.name : @"root") forKey:@"name"];
+	[payload setObject:(data.key ? data.key : @"root") forKey:@"key"];
 	[payload setObject:data.priority forKey:@"priority"];
 	[payload setObject:[NSNumber numberWithInteger:data.childrenCount] forKey:@"childrenCount"];
 
@@ -968,7 +1133,7 @@
 
 		for (FMutableData *child in data.children)
 		{
-			[children setObject:[self FMutableDataSpider:child] forKey:child.name];
+			[children setObject:[self FMutableDataSpider:child] forKey:child.key];
 		}
 
 		[payload setObject:children forKey:@"value"];

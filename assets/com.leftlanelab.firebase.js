@@ -3,8 +3,8 @@
  */
 
 // Load the [underscore] library (try for both test & studio environments)
-try {var _ = require('com.leftlanelab.firebase.underscore')}
-catch (err) {var _ = require('modules/com.leftlanelab.firebase/1.1/platform/iphone/com.leftlanelab.firebase.underscore');}
+try {var _ = require('com.leftlanelab.firebase.underscore'); }
+catch (err) {var _ = require('modules/com.leftlanelab.firebase/1.3/platform/iphone/com.leftlanelab.firebase.underscore');}
 
 var _instances = {'Firebase':0, 'FirebaseQuery':0},
 	_firebase = false,
@@ -17,8 +17,10 @@ var _instances = {'Firebase':0, 'FirebaseQuery':0},
 exports.new = function (url)
 {
 	// Only execute on the first Firebase...
-	if (! _instances.Firebase++)
+	if (_instances.Firebase === 0)
 	{
+        _instances.Firebase++;
+
 		// Set the global [firebase] handle
 		_firebase = this;
 
@@ -67,14 +69,19 @@ var Firebase = function (url)
 
 	// Return the new [Firebase] pseudo-reference
 	return this;
-}
+};
 
 /*
  * Quick & Easy Class detection hack
  *
  ******************************************************************************/
 Firebase.prototype.id = 'com.leftlanelab.firebase';
-Firebase.prototype.version = '1.1';
+Firebase.prototype.version = '1.3';
+
+Firebase.prototype.testy = function()
+{
+    _firebase.testy();
+};
 
 /*
  * Authenticates a Firebase client
@@ -301,22 +308,28 @@ Firebase.prototype.transaction = function (updateFunction, onComplete, applyLoca
 		{
 			// Preserve the [priority] of the root node
 			var _priority = currentData.priority;
+            var result, hasPriorityAndValue;
 
 			// Run the [updateFunction] over [currentData] as simple Object
 			currentData = updateFunction(FirebaseData(currentData));
 
 			// Cancelled / Aborting Transaction
-			if (_.isUndefined(currentData)) {return;}
+			if ( ! _.isUndefined(currentData)) {
+                hasPriorityAndValue = (_.isObject(currentData) && ! _.isUndefined(currentData['.priority']) && ! _.isUndefined(currentData['.value']));
+    			return hasPriorityAndValue ? currentData : {'.priority' : _priority, '.value' : currentData};
+            }
 
 			// Return [currentData] as [priority]/[value] to Firebase
-			return (_.isObject(currentData) && ! _.isUndefined(currentData['.priority']) && ! _.isUndefined(currentData['.value'])
+
 
 				// [priority] and [value] already seperated by [updateFunction]
-				? currentData
+				//? currentData
 
 				// Include preserved [priority] w/[value]
-				: {'.priority' : _priority, '.value' : currentData}
-			);
+				//:
+			//);
+
+            return result;
 		},
 
 		// Set the [applyLocally] flag to allow/suppress event triggers
@@ -508,12 +521,57 @@ Firebase.prototype.once = function (eventType, successCallback, failureCallback,
 };
 
 /*
- * Return a new FirebaseQuery limited to the specified number of children
+ * Return a new FirebaseQuery ordered by the specified child key
  *
  ******************************************************************************/
-Firebase.prototype.limit = function (limit)
+Firebase.prototype.orderByChild = function (key)
 {
-	return new FirebaseQuery (this.url).limit(limit);
+	return new FirebaseQuery (this.url).orderByChild(key);
+};
+
+/*
+ * Return a new FirebaseQuery ordered by key
+ *
+ ******************************************************************************/
+Firebase.prototype.orderByKey = function ()
+{
+	return new FirebaseQuery (this.url).orderByKey();
+};
+
+/*
+ * Return a new FirebaseQuery ordered by child values.
+ *
+ ******************************************************************************/
+Firebase.prototype.orderByValue = function ()
+{
+	return new FirebaseQuery (this.url).orderByValue();
+};
+
+/*
+ * Return a new FirebaseQuery ordered by priority
+ *
+ ******************************************************************************/
+Firebase.prototype.orderByPriority = function ()
+{
+	return new FirebaseQuery (this.url).orderByPriority();
+};
+
+/*
+ * Return a new FirebaseQuery limited to the first certain number of children
+ *
+ ******************************************************************************/
+Firebase.prototype.limitToFirst = function (limit)
+{
+	return new FirebaseQuery (this.url).limitToFirst(limit);
+};
+
+/*
+ * Return a new FirebaseQuery limited to the last certain number of children
+ *
+ ******************************************************************************/
+Firebase.prototype.limitToLast = function (limit)
+{
+	return new FirebaseQuery (this.url).limitToLast(limit);
 };
 
 /*
@@ -568,7 +626,7 @@ var FirebaseQuery = function (url)
 
 	// Return the new [FirebaseQuery] pseudo-reference
 	return this;
-}
+};
 
 /*
  * Create a listener for data changes at this location.
@@ -733,22 +791,145 @@ FirebaseQuery.prototype.once = function (eventType, successCallback, failureCall
  * Generate a new Query limited to the specified number of children
  *
  ******************************************************************************/
-FirebaseQuery.prototype.limit = function (limit)
+// FirebaseQuery.prototype.limit = function (limit)
+// {
+// 	// Safety Net
+// 	if (! _.isNumber(limit)) {throw Error ('Query.limit: Invalid arguments');}
+//
+// 	// Only allow 2 Query elements
+// 	if (_.keys(this.query).length > 2) {throw Error ('Query.limit: Can\'t combine startAt(), endAt(), and limit()');}
+//
+// 	// Prevent Orphaned Query objects on the other side of the Kroll Bridge
+// 	if (_.keys(this.listeners).length) {throw Error ('Query.limit: query locked due to active listeners (use off() to remove listeners or create a new query object)');}
+//
+// 	// Register the [query] element
+// 	this.query['limit'] = true;
+//
+// 	// Kick the Firebase
+// 	_firebase.limit(this.instance, this.url, limit);
+//
+// 	return this;
+// };
+
+/*
+ * Generate a new Query limited to the specified number of children
+ *
+ ******************************************************************************/
+FirebaseQuery.prototype.limitToFirst = function (limit)
 {
 	// Safety Net
-	if (! _.isNumber(limit)) {throw Error ('Query.limit: Invalid arguments');}
+	if (! _.isNumber(limit)) {throw Error ('Query.limitToFirst: Invalid arguments');}
 
 	// Only allow 2 Query elements
-	if (_.keys(this.query).length > 2) {throw Error ('Query.limit: Can\'t combine startAt(), endAt(), and limit()');}
+	if (_.keys(this.query).length > 2) {throw Error ('Query.limitToFirst: Can\'t combine startAt(), endAt(), and limit()');}
 
 	// Prevent Orphaned Query objects on the other side of the Kroll Bridge
-	if (_.keys(this.listeners).length) {throw Error ('Query.limit: query locked due to active listeners (use off() to remove listeners or create a new query object)');}
+	if (_.keys(this.listeners).length) {throw Error ('Query.limitToFirst: query locked due to active listeners (use off() to remove listeners or create a new query object)');}
 
 	// Register the [query] element
-	this.query['limit'] = true;
+	this.query.limitToFirst = true;
 
 	// Kick the Firebase
-	_firebase.limit(this.instance, this.url, limit);
+	_firebase.limitToFirst(this.instance, this.url, limit);
+
+	return this;
+};
+
+/*
+ * Generate a new Query limited to the specified number of children
+ *
+ ******************************************************************************/
+FirebaseQuery.prototype.limitToLast = function (limit)
+{
+	// Safety Net
+	if (! _.isNumber(limit)) {throw Error ('Query.limitToLast: Invalid arguments');}
+
+	// Only allow 2 Query elements
+	if (_.keys(this.query).length > 2) {throw Error ('Query.limitToLast: Can\'t combine startAt(), endAt(), and limit()');}
+
+	// Prevent Orphaned Query objects on the other side of the Kroll Bridge
+	if (_.keys(this.listeners).length) {throw Error ('Query.limitToLast: query locked due to active listeners (use off() to remove listeners or create a new query object)');}
+
+	// Register the [query] element
+	this.query.limitToLast = true;
+
+	// Kick the Firebase
+	_firebase.limitToLast(this.instance, this.url, limit);
+
+	return this;
+};
+
+/*
+ * Generate a new Query limited to the specified number of children
+ *
+ ******************************************************************************/
+FirebaseQuery.prototype.orderByChild = function (key)
+{
+    // Safety Net
+	if (! _.isString(key)) {throw Error ('Query.orderByChild: Invalid arguments');}
+
+    // Prevent Orphaned Query objects on the other side of the Kroll Bridge
+	if (_.keys(this.listeners).length) {throw Error ('Query.orderByChild: query locked due to active listeners (use off() to remove listeners or create a new query object)');}
+
+    // Register the [query] element
+	this.query.orderByChild = true;
+
+    // Kick the Firebase
+	_firebase.orderByChild(this.instance, this.url, key);
+
+	return this;
+};
+
+/*
+ * Generate a new Query limited to the specified number of children
+ *
+ ******************************************************************************/
+FirebaseQuery.prototype.orderByPriority = function ()
+{
+    // Prevent Orphaned Query objects on the other side of the Kroll Bridge
+	if (_.keys(this.listeners).length) {throw Error ('Query.orderByPriority: query locked due to active listeners (use off() to remove listeners or create a new query object)');}
+
+    // Register the [query] element
+	this.query.orderByPriority = true;
+
+    // Kick the Firebase
+	_firebase.orderByPriority(this.instance, this.url);
+
+	return this;
+};
+
+/*
+ * Generate a new Query limited to the specified number of children
+ *
+ ******************************************************************************/
+FirebaseQuery.prototype.orderByKey = function ()
+{
+    // Prevent Orphaned Query objects on the other side of the Kroll Bridge
+	if (_.keys(this.listeners).length) {throw Error ('Query.orderByKey: query locked due to active listeners (use off() to remove listeners or create a new query object)');}
+
+    // Register the [query] element
+	this.query.orderByKey = true;
+
+    // Kick the Firebase
+	_firebase.orderByKey(this.instance, this.url);
+
+	return this;
+};
+
+/*
+ * Generate a new Query limited to the specified number of children
+ *
+ ******************************************************************************/
+FirebaseQuery.prototype.orderByValue = function ()
+{
+    // Prevent Orphaned Query objects on the other side of the Kroll Bridge
+	if (_.keys(this.listeners).length) {throw Error ('Query.orderByValue: query locked due to active listeners (use off() to remove listeners or create a new query object)');}
+
+    // Register the [query] element
+	this.query.orderByValue = true;
+
+    // Kick the Firebase
+	_firebase.orderByValue(this.instance, this.url);
 
 	return this;
 };
@@ -770,7 +951,7 @@ FirebaseQuery.prototype.startAt = function (priority, name)
 	if (_.keys(this.listeners).length) {throw Error ('Query.startAt: query locked due to active listeners (use off() to remove listeners or create a new query object)');}
 
 	// Register the query element
-	this.query['startAt'] = true;
+	this.query.startAt = true;
 
 	// Kick the Firebase
 	_firebase.startAt(this.instance, this.url, priority, (_.isString(name) ? name : null));
@@ -795,7 +976,7 @@ FirebaseQuery.prototype.endAt = function (priority, name)
 	if (_.keys(this.listeners).length) {throw Error ('Query.endAt: query locked due to active listeners (use off() to remove listeners or create a new query object)');}
 
 	// Register the query element
-	this.query['endAt'] = true;
+	this.query.endAt = true;
 
 	// Kick the Firebase
 	_firebase.endAt(this.instance, this.url, priority, (_.isString(name) ? name : null));
@@ -934,7 +1115,7 @@ var FirebaseData = function (data, priority)
 	});
 
 	return dictionary;
-}
+};
 
 /*
  * Firebase Snapshot Object
@@ -986,8 +1167,7 @@ var FirebaseSnapshot = function (data, url)
 		var _stop = false;
 
 		// Iterate over the [keys] of [data].[value] by [priority]
-		_.each(_.sortBy(_.keys(data.value), function (key) {return data.value[key].priority || 0;}), function (key)
-		{
+		_.each(_.keys(data.value), function (key) {
 			_stop = (_stop || childAction(new FirebaseSnapshot(data.value[key], url + '/' + key)) === true);
 		});
 
