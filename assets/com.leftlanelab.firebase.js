@@ -159,12 +159,12 @@ Firebase.prototype.root = function ()
  *
  * 	- Matches Firebase Library (VS: 2014-07-23)
  ******************************************************************************/
-Firebase.prototype.name = function ()
+Firebase.prototype.key = function ()
 {
 	// Simple Safety Net (already at the top)
 	if (! this.url.match(/^https\:\/\/([\S]*[^\/])\/[\S][^\/]*/i)) {return null;}
 
-	// Pop the [child] off and you have the [name]
+	// Pop the [child] off and you have the [key]
 	return this.url.replace(/^https\:\/\/[\S]+\/([^\/]+)[\/]?/i, "$1");
 };
 
