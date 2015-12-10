@@ -6,7 +6,7 @@ Native iOS Module for using Firebase with Titanium apps.
 
 Module has been tested with the following versions of the Titanium SDK:
 
-- Titanium 4.0.0
+- Titanium 5.1.1
 
 ## Installation ##
 

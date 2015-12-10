@@ -6,13 +6,11 @@ Native iOS Module for using Firebase with Titanium apps.
 
 Module has been tested with the following versions of the Titanium SDK:
 
-- Titanium 3.2.1
-- Titanium 3.3.0
-- Titanium 3.4.0
+- Titanium 5.1.1
 
 ## Installation ##
 
-- Download the latest build from the [releases page](https://github.com/LeftLaneLab/firebase-titanium/releases).
+- Download the latest build from the [releases page](https://github.com/ianko/firebase-titanium/releases).
 - Use [these instructions](http://docs.appcelerator.com/titanium/3.0/#!/guide/Using_a_Module) from Appcelerator to install the module file.
 
 ## Documentation ##

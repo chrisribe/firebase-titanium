@@ -15,4 +15,4 @@ name: Firebase iOS Module
 moduleid: com.leftlanelab.firebase
 guid: f97fea19-e0e1-4bf7-a741-b4f36e3c5a6c
 platform: iphone
-minsdk: 4.0.0.GA
+minsdk: 5.1.1.GA
