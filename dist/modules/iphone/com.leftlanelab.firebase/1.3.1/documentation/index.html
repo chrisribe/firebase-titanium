@@ -1,0 +1,92 @@
+<h1>Firebase iOS Module for Titanium</h1>
+
+<p>Native iOS Module for using Firebase with Titanium apps.</p>
+
+<h2>Compatibility</h2>
+
+<p>Module has been tested with the following versions of the Titanium SDK:</p>
+
+<ul><li>Titanium 3.2.1</li><li>Titanium 3.3.0</li><li>Titanium 3.4.0</li></ul>
+
+<h2>Installation</h2>
+
+<ul><li>Download the latest build from the <a href="https://github.com/LeftLaneLab/firebase-titanium/releases">releases page</a>.</li><li>Use <a href="http://docs.appcelerator.com/titanium/3.0/#!/guide/Using_a_Module">these instructions</a> from Appcelerator to install the module file.</li></ul>
+
+<h2>Documentation</h2>
+
+<p>This module is constructed to mimic the official <a href="https://www.firebase.com/docs/javascript/firebase/index.html">Firebase JavaScript Library</a>. All functions available with the official library are also available on this module. All methods take the same arguments and return the same values where applicable.</p>
+
+<p><strong>The only difference is the syntax for creating a new Firebase reference.</strong></p>
+
+<p><code></code>`JavaScript
+var Firebase = require(&#39;com.leftlanelab.firebase&#39;);</p>
+
+<p>// WRONG: Official Firebase JavaScript library method
+var firebaseReference = new Firebase(&#39;https://l3-appcelerator-demo.firebaseio.com/users&#39;);</p>
+
+<p>// CORRECT: Method to use with this module
+var firebaseReference = Firebase.new(&#39;https://l3-appcelerator-demo.firebaseio.com/users&#39;);</p>
+
+<p>// CORRECT: ... when com.leftlanelab.firebase.forge is set in tiapp.xml
+var firebaseReference = Firebase.new(&#39;/users&#39;);
+<code></code>`</p>
+
+<h2>Tutorials</h2>
+
+<p>Traverse a Firebase location, and write some data.</p>
+
+<p><code></code>`JavaScript
+var Firebase = require(&#39;com.leftlanelab.firebase&#39;);</p>
+
+<p>var sampleChatRef = Firebase.new(&#39;https://l3-appcelerator-demo.firebaseio.com&#39;);
+var fredNameRef = sampleChatRef.child(&#39;users/fred/name&#39;);
+fredNameRef.set({first: &#39;Fred&#39;, last: &#39;Flintstone&#39;});
+<code></code>`</p>
+
+<p>Now read the data back (and get notified whenever it changes).</p>
+
+<p><code>JavaScript
+fredNameRef.on(&#39;value&#39;, function (nameSnapshot) {
+  var y = nameSnapshot.val();
+  // y now contains the object { first: &#39;Fred&#39;, last: &#39;Flintstone&#39; }.
+});
+</code></p>
+
+<p>Let&#39;s add a new chat message child to the message_list location.</p>
+
+<p><code>JavaScript
+var messageListRef = sampleChatRef.child(&#39;message_list&#39;);
+messageListRef.push({&#39;user_id&#39;: &#39;fred&#39;, &#39;text&#39;: &#39;Yabba Dabba Doo!&#39;});
+</code></p>
+
+<p>And let&#39;s listen for new children added to the message_list location. We&#39;ll be notified of our &#39;Yabba Dabba Doo!&#39; message as well as any other messages that were added in the past, and any new messages that get added in the future.</p>
+
+<p><code>JavaScript
+messageListRef.on(&#39;child_added&#39;, function(newMessageSnapshot) {
+  var userId = newMessageSnapshot.child(&#39;user_id&#39;).val();
+  var text = newMessageSnapshot.child(&#39;text&#39;).val();
+  // Do something with user_id and text.
+});
+</code></p>
+
+<h2>Global Properties (tiapp.xml)</h2>
+
+<p>Global configuration options can be defined in the <code>tiapp.xml</code> file.</p>
+
+<p><em>NOTE: These are optional</em></p>
+
+<h4>Properties</h4>
+
+<ul><li><strong>forge</strong> : base value for new Firebase references. This value can always be overridden by specifying an absolute URL when calling <code>Firebase.new( )</code>.</li><li><strong>persistence</strong> : Enables the Firebase iOS Disk Persistence feature (default: <code>false</code>)</li></ul>
+
+<h4>Usage</h4>
+
+<p><code>XML
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;ti:app xmlns:ti=&quot;http://ti.appcelerator.org&quot;&gt;
+  ...
+  &lt;property name=&quot;com.leftlanelab.firebase.forge&quot; type=&quot;string&quot;&gt;https://l3-appcelerator-demo.firebaseio.com/&lt;/property&gt;
+  &lt;property name=&quot;com.leftlanelab.firebase.persistence&quot; type=&quot;bool&quot;&gt;true&lt;/property&gt;
+  ...
+&lt;/ti:app&gt;
+</code></p>
